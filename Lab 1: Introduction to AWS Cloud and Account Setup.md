@@ -27,27 +27,27 @@ AWS organizes its infrastructure into **Regions** (geographic areas) and **Avail
   - AWS account name
   - A strong root password
 
-> *Screenshot: Account creation page*
+> *Screenshot: Account creation page [Optional]*
 
 **Step 3:** Provide contact information (select "Personal" as the account type) and enter a payment method (credit or debit card for identity verification; no charges apply under the Free Tier).
 
 **Step 4:** Complete identity verification via phone or SMS.
 
-**Step 5:** Select the **"Basic Support – Free"** plan and click **Complete Sign Up**.
+**Step 5:** Select the **"Basic Support - Free"** plan and click **Complete Sign Up**.
 
-> *Screenshot: Support plan selection page*
+> *Screenshot: Support plan selection page [Optional]*
 
 **Step 6:** Sign in to the **AWS Management Console** at [https://console.aws.amazon.com](https://console.aws.amazon.com)
 
 **Step 7:** Explore the Console Dashboard:
-- Locate the **Region selector** in the top-right corner and select the nearest region
+- Locate the **Region selector** in the top right corner and select the nearest region
 - Browse service categories: Compute, Storage, Database, Networking, Security
 
-> *Screenshot: AWS Management Console dashboard showing service categories*
+> *Screenshot: AWS Management Console dashboard showing service categories [Optional]*
 
 **Step 8:** Navigate to **AWS Billing Dashboard** and open **Free Tier Usage** to view available free services and their usage limits.
 
-> *Screenshot: Free Tier usage tracking page*
+> *Screenshot: Free Tier usage tracking page [Optional]*
 
 **Step 9:** Open **IAM (Identity and Access Management)** and create an IAM user with admin permissions. Using an IAM user instead of the root account is a standard security practice.
 - Go to IAM > Users > Add User
@@ -55,12 +55,12 @@ AWS organizes its infrastructure into **Regions** (geographic areas) and **Avail
 - Enable "AWS Management Console access"
 - Attach policy: `AdministratorAccess`
 
-> *Screenshot: IAM user creation with policy attached*
+> *Screenshot: IAM user creation with policy attached [Optional]*
 
 **Step 10:** Enable **MFA (Multi-Factor Authentication)** on the root account:
 - IAM > Dashboard > "Activate MFA on your root account"
 
-> *Screenshot: MFA setup completion*
+> *Screenshot: MFA setup completion [Optional]*
 
 **Results:**
   - AWS Free Tier account successfully created and configured
@@ -68,6 +68,8 @@ AWS organizes its infrastructure into **Regions** (geographic areas) and **Avail
   - IAM user created with appropriate permissions
   - MFA enabled on the root account
   - AWS Regions and Availability Zones structure identified
+
+> *Screenshot: Screenshot of your AWS Management Console displaying your name and college name. [Mandatory]*
 
 **Discussion and Conclusion:**
 
