@@ -1,4 +1,4 @@
-# Title: Getting Started with AWS Cloud Platform
+# Getting Started with AWS Cloud Platform
 
 **Objectives:**
   - Understand the AWS Cloud ecosystem and its global infrastructure
