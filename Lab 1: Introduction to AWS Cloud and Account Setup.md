@@ -29,7 +29,7 @@ AWS organizes its infrastructure into **Regions** (geographic areas) and **Avail
 
 >*Take a screenshot of the account creation page.*
 
-**Step 3:** Provide contact information (select "Personal" account type), then enter a payment method (credit/debit card for identity verification — no charges apply under the Free Tier).
+**Step 3:** Provide contact information (select "Personal" account type), then enter a payment method (credit/debit card for identity verification: no charges apply under the Free Tier).
 
 **Step 4:** Complete identity verification via phone or SMS.
 
