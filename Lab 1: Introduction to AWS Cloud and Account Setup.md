@@ -71,6 +71,11 @@ AWS organizes its infrastructure into **Regions** (geographic areas) and **Avail
 
 > *Screenshot: Screenshot of your AWS Management Console displaying your name and college name. [Mandatory]*
 
+> Sample:
+
+<img width="1464" height="846" alt="Screenshot 2026-04-12 at 9 55 33 AM" src="https://github.com/user-attachments/assets/6981ce78-5293-4248-8245-e0bbd700ac04" />
+
+
 **Discussion and Conclusion:**
 
 This lab covered the foundational setup of the AWS cloud platform, which reflects all five NIST characteristics of cloud computing. The Management Console provides on-demand self service provisioning. The global infrastructure of Regions and Availability Zones demonstrates resource pooling and broad network access. The Free Tier model reflects a measured service approach. Rapid elasticity will be observed in subsequent labs. Creating a dedicated IAM user and enabling MFA on the root account follows the principle of least privilege, which is a core security practice in any cloud environment. AWS provides a practical and accessible platform for building hands-on experience with cloud computing concepts.
