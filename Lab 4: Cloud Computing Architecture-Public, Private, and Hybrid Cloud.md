@@ -10,6 +10,7 @@
 ---
 
 **Theory**
+
 Cloud deployment models determine the infrastructure's location and who manages it:  
   - **Public Cloud:**
     - Shared resources available over the internet (e.g., AWS, Azure). It is cost effective with a pay per use billing approach.  
