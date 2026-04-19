@@ -58,63 +58,70 @@ This dynamic behavior is a direct benefit of cloud virtualization. The ability t
 
 ```bash
 #!/bin/bash
-# Corrected user data script for Amazon Linux 2023
 
-# Enhanced logging
 exec > >(tee /var/log/user-data.log) 2>&1
 echo "=== User Data Script Started at $(date) ==="
 
-# Wait for the system to be ready
 sleep 10
 
-# Update system using dnf (Amazon Linux 2023 uses dnf, not yum)
 echo "Updating system packages..."
 dnf update -y
 echo "System update completed"
 
-# Install httpd
 echo "Installing httpd..."
 dnf install -y httpd
 echo "httpd installation completed"
 
-# Start and enable httpd
 echo "Starting httpd service..."
 systemctl start httpd
 systemctl enable httpd
 echo "httpd service started and enabled"
 
-# Wait for metadata service to be available
 echo "Waiting for metadata service..."
 sleep 5
 
-# Get instance metadata with retry logic
-echo "Retrieving instance metadata..."
+# -------------------------------------------------------
+# IMDSv2: get a session token first, then use it for all
+# metadata requests (required on Amazon Linux 2023 by default)
+# -------------------------------------------------------
+echo "Retrieving IMDSv2 token..."
 for i in {1..5}; do
-    INSTANCE_ID=$(curl -s --connect-timeout 10 http://169.254.169.254/latest/meta-data/instance-id)
-    if [ ! -z "$INSTANCE_ID" ]; then
+    TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+        -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" \
+        --connect-timeout 10)
+    if [ -n "$TOKEN" ]; then
+        echo "IMDSv2 token acquired"
         break
     fi
+    echo "Retry $i for IMDSv2 token..."
+    sleep 3
+done
+
+echo "Retrieving instance metadata..."
+for i in {1..5}; do
+    INSTANCE_ID=$(curl -s --connect-timeout 10 \
+        -H "X-aws-ec2-metadata-token: $TOKEN" \
+        http://169.254.169.254/latest/meta-data/instance-id)
+    if [ -n "$INSTANCE_ID" ]; then break; fi
     echo "Retry $i for instance ID..."
     sleep 3
 done
 
 for i in {1..5}; do
-    AZ=$(curl -s --connect-timeout 10 http://169.254.169.254/latest/meta-data/placement/availability-zone)
-    if [ ! -z "$AZ" ]; then
-        break
-    fi
+    AZ=$(curl -s --connect-timeout 10 \
+        -H "X-aws-ec2-metadata-token: $TOKEN" \
+        http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    if [ -n "$AZ" ]; then break; fi
     echo "Retry $i for AZ..."
     sleep 3
 done
 
-# Use default values if metadata fails
-INSTANCE_ID=${INSTANCE_ID:-"Unknown"}
-AZ=${AZ:-"Unknown"}
+INSTANCE_ID=${INSTANCE_ID:-"Unavailable"}
+AZ=${AZ:-"Unavailable"}
 
 echo "Instance ID: $INSTANCE_ID"
 echo "Availability Zone: $AZ"
 
-# Create HTML content
 echo "Creating web page..."
 cat > /var/www/html/index.html << EOF
 <!DOCTYPE html>
@@ -122,74 +129,167 @@ cat > /var/www/html/index.html << EOF
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Load Balancer Test - $INSTANCE_ID</title>
+    <title>Load Balancer Test — $INSTANCE_ID</title>
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background-color: #0f1117;
+            color: #e2e8f0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2rem;
         }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+
+        .card {
+            background: #1a1d27;
+            border: 1px solid #2d3148;
+            border-radius: 12px;
+            padding: 2.5rem 3rem;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
         }
-        .instance-id {
-            color: #FFD700;
-            font-size: 28px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+
+        .card-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid #2d3148;
         }
-        .az {
-            color: #00FF7F;
-            font-size: 20px;
-            font-weight: bold;
+
+        .badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #6c8ebf;
+            background: #1e2640;
+            border: 1px solid #2d3a5c;
+            border-radius: 4px;
+            padding: 3px 8px;
+            margin-bottom: 0.75rem;
         }
-        .timestamp {
-            color: #FFB6C1;
-            font-style: italic;
-        }
+
         h1 {
-            font-size: 36px;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+
+        .meta-grid {
+            display: grid;
+            gap: 0.85rem;
+            margin-bottom: 2rem;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .meta-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .meta-value {
+            font-size: 0.875rem;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            color: #94b8ff;
+            font-weight: 500;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .meta-value.zone {
+            color: #7ecfb3;
+        }
+
+        .meta-value.time {
+            color: #9ba8bb;
+            font-size: 0.8rem;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #2d3148;
+            margin: 0 0 1.5rem;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            color: #7ecfb3;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .status::before {
+            content: '';
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #7ecfb3;
+            flex-shrink: 0;
+        }
+
+        .hint {
+            font-size: 0.78rem;
+            color: #475569;
+            padding-left: 1.1rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Load Balancer Test</h1>
-        <div class="instance-id">Instance: $INSTANCE_ID</div>
-        <br>
-        <div class="az">Zone: $AZ</div>
-        <br>
-        <div class="timestamp">Generated: $(date)</div>
-        <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 30px 0;">
-        <p>Web Server Running Successfully!</p>
-        <p>Refresh to test load balancing</p>
+    <div class="card">
+        <div class="card-header">
+            <div class="badge">EC2 · Load Balancer</div>
+            <h1>Instance Info</h1>
+        </div>
+
+        <div class="meta-grid">
+            <div class="meta-row">
+                <span class="meta-label">Instance ID</span>
+                <span class="meta-value">$INSTANCE_ID</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Availability Zone</span>
+                <span class="meta-value zone">$AZ</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Generated</span>
+                <span class="meta-value time">$(date -u '+%Y-%m-%d %H:%M UTC')</span>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="status">Server running</div>
+        <div class="hint">Refresh the page to verify load balancing across instances.</div>
     </div>
 </body>
 </html>
 EOF
 
-# Set proper permissions
 chown apache:apache /var/www/html/index.html
 chmod 644 /var/www/html/index.html
 
-# Ensure httpd is running
 systemctl restart httpd
 
-# Verify everything is working
 echo "Verifying installation..."
 systemctl status httpd --no-pager
 curl -s localhost | head -5
@@ -279,17 +379,25 @@ echo "=== User Data Script Completed Successfully at $(date) ==="
 
 > Sample:
 
-<img width="1456" height="715" alt="Screenshot 2026-04-17 at 11 21 51 AM" src="https://github.com/user-attachments/assets/12d9fd04-668a-4e10-a274-7589279fae2a" />
+<img width="1457" height="533" alt="Screenshot 2026-04-19 at 7 18 07 AM" src="https://github.com/user-attachments/assets/963023f7-e4f5-4443-92fd-12b5839b99fe" />
+
 
 
 **Step 6: Verify Initial Instances**
   - **Wait 8-12 minutes** for instances to launch, install software, and pass health checks
   - Navigate to **EC2 > Instances** and confirm two instances with prefix `web-asg` are **Running**
+    
+> Sample :
+
+<img width="1444" height="311" alt="Screenshot 2026-04-19 at 7 17 03 AM" src="https://github.com/user-attachments/assets/05992dd3-5cc1-4518-8f0d-3a28572b9f04" />
+
+
   - **Test individual instances:** Copy public IP of one instance and test `http://[public-ip]` in browser
     
-> Sample [Optional]:
+> Sample:
 
-<img width="1282" height="833" alt="Screenshot 2026-04-17 at 11 23 02 AM" src="https://github.com/user-attachments/assets/4a555ad3-371f-4879-84f6-834a6a7d0166" />
+<img width="1316" height="853" alt="Screenshot 2026-04-19 at 7 24 45 AM" src="https://github.com/user-attachments/assets/964c6af0-5ddc-49d8-bf73-bb6c9c865f4b" />
+
 
   - Navigate to **Target Groups > web-target-group > Targets tab** and confirm both instances show **Healthy** status
 
@@ -297,7 +405,7 @@ echo "=== User Data Script Completed Successfully at $(date) ==="
 
 > Sample:
 
-<img width="1456" height="716" alt="Screenshot 2026-04-17 at 11 24 18 AM" src="https://github.com/user-attachments/assets/222260c8-64de-419e-bca3-5f0757f610fc" />
+<img width="1459" height="593" alt="Screenshot 2026-04-19 at 7 26 15 AM" src="https://github.com/user-attachments/assets/92986096-ddd7-4e0e-8f11-ce09f14d3660" />
 
 
 >*Troubleshooting if instances remain unhealthy (do not include this on lab report):*
@@ -320,7 +428,10 @@ echo "=== User Data Script Completed Successfully at $(date) ==="
 
 > Sample:
 
-<img width="1075" height="795" alt="Screenshot 2026-04-17 at 11 29 44 AM" src="https://github.com/user-attachments/assets/a4b13daf-dedd-48d8-befa-f01974535608" />
+<img width="1314" height="856" alt="Screenshot 2026-04-19 at 7 28 26 AM" src="https://github.com/user-attachments/assets/03dff8db-4b4b-414f-a323-cfc724706153" />
+
+
+<img width="1304" height="857" alt="Screenshot 2026-04-19 at 7 27 23 AM" src="https://github.com/user-attachments/assets/723c5976-80cd-4bd0-b205-51f415e8ea6b" />
 
 
 **Step 8: Trigger a Scale Out Event**
@@ -338,16 +449,25 @@ echo "=== User Data Script Completed Successfully at $(date) ==="
   ```
   - Navigate to **Auto Scaling Groups > web-asg > Activity tab**
     
-> Sample:
-
-<img width="1457" height="717" alt="Screenshot 2026-04-17 at 11 41 44 AM" src="https://github.com/user-attachments/assets/bcc2c250-6c99-45f0-b7d4-931acd0db366" />
-
-  - Within 3-5 minutes, observe the new instance launching
-  - Monitor **CloudWatch > Alarms** to see CPU alarm trigger
-    
-> Sample:
+> Sample [Mandatory]:
 
 <img width="1459" height="346" alt="Screenshot 2026-04-17 at 11 53 26 AM" src="https://github.com/user-attachments/assets/86ea0cc3-8a42-47ad-8d5f-787e1e5e1caa" />
+
+<img width="1457" height="489" alt="Screenshot 2026-04-19 at 7 41 32 AM" src="https://github.com/user-attachments/assets/741afd61-8966-4d3c-9427-f2abcbc3d74b" />
+
+
+  - Within 3-5 minutes, observe the new instance launching
+    
+> Sample [Mandatory]:
+
+<img width="1459" height="294" alt="Screenshot 2026-04-19 at 7 42 00 AM" src="https://github.com/user-attachments/assets/36020e21-0ee7-4a04-8eff-02d3b20fdbe4" />
+
+
+  - Monitor **CloudWatch > Alarms** to see CPU alarm trigger
+    
+> Sample [Mandatory]:
+
+<img width="1459" height="402" alt="Screenshot 2026-04-19 at 7 47 02 AM" src="https://github.com/user-attachments/assets/ac670a86-99fe-48bb-a20a-e9ecbbca91d2" />
 
 
 **Step 9: Observe Scale In Behavior**
@@ -356,6 +476,10 @@ echo "=== User Data Script Completed Successfully at $(date) ==="
   - After the cooldown period (5-10 minutes), observe the instance termination
   - Verify desired capacity returns to 2
 
+>Sample [Mandatory]:
+
+<img width="1444" height="528" alt="Screenshot 2026-04-19 at 8 43 56 AM" src="https://github.com/user-attachments/assets/bad14519-5e0d-4381-bc78-c2a790bc24be" />
+
 
 **Step 10: Test Self Healing**
   - Navigate to **EC2 > Instances**
@@ -363,6 +487,10 @@ echo "=== User Data Script Completed Successfully at $(date) ==="
   - **Instance state > Terminate instance > Terminate**
   - Check **Auto Scaling Groups > web-asg > Activity tab**
   - Confirm new instance launches automatically within 2-3 minutes
+
+> Sample [Mandatory]:
+
+![Screenshot 2026-04-19 at 8 45 06 AM](https://github.com/user-attachments/assets/ab496937-f3be-4188-b595-bd272081f852)
 
 ---
 
