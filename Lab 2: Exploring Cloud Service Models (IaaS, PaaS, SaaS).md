@@ -1,11 +1,15 @@
 # Understanding Cloud Service Models using AWS EC2, AWS Lambda, and Amazon WorkDocs
 
+---
+
 **Objectives:**
   - Differentiate between IaaS, PaaS, and SaaS service models on AWS
   - Launch an EC2 instance (IaaS)
   - Deploy and invoke a serverless function using AWS Lambda (PaaS)
   - Access a SaaS application through AWS
   - Compare the level of control, flexibility, and management responsibility across models
+
+---
 
 **Theory:**
 
@@ -176,7 +180,6 @@ def lambda_handler(event, context):
 > Sample:
 
 <img width="1344" height="557" alt="Screenshot 2026-04-12 at 12 16 47 PM" src="https://github.com/user-attachments/assets/10ae1904-adf7-4735-aab5-a1bb1c96d95e" />
-
 
 
 **Step 8:** Click `Test` -> `Create new test event`. Configure the following test events and run each one:
