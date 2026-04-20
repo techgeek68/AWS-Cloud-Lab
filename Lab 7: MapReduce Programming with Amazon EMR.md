@@ -19,7 +19,7 @@ MapReduce is a programming model for processing large datasets in parallel acros
   - Input data is split into chunks. Each mapper processes a chunk independently and produces intermediate key value pairs.
 
 **Shuffle and Sort Phase:** 
-  - The intermediate key-value pairs are grouped by key and forwarded to the appropriate reducers.
+  - The intermediate key value pairs are grouped by key and forwarded to the appropriate reducers.
 
 **Reduce Phase:** 
   - Each reducer aggregates all values for a given key and produces the final output.
@@ -48,12 +48,16 @@ MapReduce is a programming model for processing large datasets in parallel acros
 **1a. Create the S3 Bucket**
 
   - Go to **AWS Console** -> Search **S3** -> Click **Create bucket**
-  - Set **Bucket name:** `emr-lab-<your-name>` *(replace `<your-name>` with your name)*
+  - Set **Bucket name:** `emr-lab-<your-name>`       *(replace `<your-name>` with your name)*
   - **Bucket type** -> `General purpose`
   - **ACLs** -> `Disabled`
   - Leave all other settings as default -> Click **Create bucket**
   - Open your bucket -> Click **Create folder** -> Name it `logs` -> Click **Create folder** *(at bucket root)*
-  - Click **Create folder** again → Name it `input` -> Click **Create folder** *(at bucket root)*
+  - Click **Create folder** again -> Name it `input` -> Click **Create folder** *(at bucket root)*
+
+>*Sample: [Optional]*
+
+<img width="1457" height="335" alt="Screenshot 2026-04-20 at 7 14 11 AM" src="https://github.com/user-attachments/assets/d7e33f04-7341-43c7-920c-472360170ab9" />
 
 
 **1b. Create the Input File Locally**
@@ -64,7 +68,7 @@ MapReduce is a programming model for processing large datasets in parallel acros
 - Paste the following content:
   ```
   Cloud computing is the future of computing
-  Cloud services include IaaS PaaS and SaaS
+  Cloud services include IaaS, PaaS, and SaaS
   Virtualization enables cloud computing
   Cloud computing provides scalability and elasticity
   ```
@@ -72,15 +76,16 @@ MapReduce is a programming model for processing large datasets in parallel acros
 
 
 **1c. Upload to S3**
-  - Open your bucket → Click into the `input/` folder
-  - Click **Upload** → Click **Add files** → Select your `input.txt` file
+  - Open your bucket -> Click into the `input/` folder
+  - Click **Upload** -> Click **Add files** -> Select your `input.txt` file
   - Click **Upload**
 
-> *Screenshot checkpoint: S3 bucket showing `input/input.txt` *(only `input.txt` inside `input/`, no subfolders)*
+> *Screenshot checkpoint: S3 bucket showing `input/input.txt` (only `input.txt` inside `input/`, no subfolders)*
 
 >Sample:
 
-<img width="1459" height="340" alt="Screenshot 2026-04-19 at 11 37 10 AM" src="https://github.com/user-attachments/assets/3db53285-daa6-4d92-9220-3575e361ce07" />
+<img width="1457" height="330" alt="Screenshot 2026-04-20 at 7 19 09 AM" src="https://github.com/user-attachments/assets/249cdb14-b1db-413b-9641-db09ece73862" />
+
 
 
 **Step 2: Create the EMR Cluster**
@@ -96,20 +101,20 @@ MapReduce is a programming model for processing large datasets in parallel acros
 | **Primary instance type** | `m5.xlarge` |
 | **Core instance type** | `m5.xlarge` |
 | **Task node** | Click **Remove instance group** to remove Task node |
+| **EBS root volume size** | `15 GiB` (default) |
 | **Core instance count** | `2` |
-| **Cluster configuration** | **Uniform instance groups** |
-| **Cluster scaling** | **Set cluster size manually** |
-| **Networking — VPC** | Leave default selected |
-| **Networking — Subnet** | Leave default selected  |
+| **Cluster configuration** |Uniform instance groups |
+| **Cluster scaling** | Set cluster size manually |
+| **Networking-VPC** | Leave default selected |
+| **Networking-Subnet** | Leave default selected  |
 | **Security groups** | Leave as **EMR-managed** for both Primary and Core nodes |
 | **Cluster termination** | Automatically terminate cluster after idle time |
-| **Idle time** | `01:00:00` (1 hour) |
+| **Cluster termination and node replacement** | Idle time `01:00:00` (1 hour) |
 | **Termination protection** | **Off** |
 | **EC2 Key pair** | Select your existing key pair from the dropdown |
-| **Cluster logs-S3 location** | `s3://emr-lab-<your-id>/logs/` (`Copy S3 uri` of logs folder and paste) |
+| **Cluster logs** | Amazon S3 location `s3://emr-lab-<your-id>/logs/` (`Copy S3 uri` of logs folder and paste) |
 | **Service role** | `EMR_DefaultRole` |
 | **EC2 instance profile** | `EMR_EC2_DefaultRole` |
-| **EBS root volume size** | `15 GiB` (default) |
 | **Operating system** | Amazon Linux (default, latest updates applied) |
 
 5. Click **Create cluster**
@@ -117,14 +122,16 @@ MapReduce is a programming model for processing large datasets in parallel acros
 **Step 3: Wait for the Cluster to Become Ready**
 
   1. You'll be redirected to the cluster detail page
-  2. Watch the **Status** badge cycle through: - 🔵 `Starting` → 🟡 `Bootstrapping` → 🟢 **`Waiting`**
-  3. This typically takes **8–15 minutes**
+  2. Watch the **Status** badge cycle through: `Starting` -> `Bootstrapping` -> `Waiting`
+  3. This typically takes 8-15 minutes
 
->*Screenshot checkpoint: Cluster showing Waiting status [Mandatory]*
+>*Screenshot checkpoint: Cluster showing status [Mandatory]*
 
 >Sample:
 
-<img width="1455" height="714" alt="Screenshot 2026-04-19 at 12 30 56 PM" src="https://github.com/user-attachments/assets/18cf0e5a-b0f9-461a-9645-483b1c40a0c8" />
+<img width="1455" height="419" alt="Screenshot 2026-04-20 at 12 56 07 PM" src="https://github.com/user-attachments/assets/2484406a-a739-4306-96a1-c88206284e12" />
+
+<img width="1455" height="416" alt="Screenshot 2026-04-20 at 12 58 09 PM" src="https://github.com/user-attachments/assets/7341f377-faf0-4abb-ab39-94fc1ebdad3a" />
 
 
 **Step 4: Write and Upload the MapReduce Scripts**
@@ -175,29 +182,23 @@ if current_word:
 
 **4b. Upload Scripts to S3**
 
-  1. Go to your S3 bucket → Click **Create folder** → Name it `scripts` → Click **Create folder**
-  2. Click into `scripts/` folder → Click **Upload**
-  3. Click **Add files** → Select **both** `mapper.py` and `reducer.py`
+  1. Go to your S3 bucket -> Click **Create folder** -> Name it `scripts` -> Click **Create folder**
+  2. Click into `scripts/` folder -> Click **Upload**
+  3. Click **Add files** -> Select **both** `mapper.py` and `reducer.py`
   4. Click **Upload**
 
->*Screenshot checkpoint: S3 `scripts/` folder showing both files*
+>*Screenshot checkpoint: S3 `scripts/` folder showing both files [Mandatory].*
 
 >Sample:
 
-<img width="1461" height="470" alt="Screenshot 2026-04-19 at 12 36 12 PM" src="https://github.com/user-attachments/assets/a1cc467f-b466-4d94-ab8e-1167e8c5928a" />
+<img width="1459" height="338" alt="Screenshot 2026-04-20 at 7 22 00 AM" src="https://github.com/user-attachments/assets/edda2dea-cd85-48ca-af7f-1d6e892ff5de" />
 
 
 **Step 5: Add a Streaming Step to the Cluster**
 
-1. Go to **EMR Console** → Click your `MapReduce-Lab-Cluster`
-2. Click the **Steps** tab → Click **Add step**
-   
-> Sample:
-
-<img width="1457" height="427" alt="Screenshot 2026-04-19 at 12 37 39 PM" src="https://github.com/user-attachments/assets/2a5760a0-5c9a-4116-8d67-5b87a5a47348" />
-
-
-4. In the dialog, configure:
+1. Go to **EMR Console** -> Click your `MapReduce-Lab-Cluster`
+2. Click the **Steps** tab -> Click **Add step**
+3. In the dialog, configure:
 
 | Field | Value |
 |---|---|
@@ -207,90 +208,65 @@ if current_word:
 | **Reducer** | `s3://emr-lab-<your-id>/scripts/reducer.py` |
 | **Input location** | `s3://emr-lab-<your-id>/input/` |
 | **Output location** | `s3://emr-lab-<your-id>/output/wordcount/` |
-| **Action on failure** | `Continue` |
+| **Step action Action if step fails** | `Continue` |
 
 > The **output path must NOT already exist** in S3. Hadoop will create it automatically.
 
-5. Click **Add**
+4. Click **Add step**
 
+>Sample:
+
+<img width="1454" height="685" alt="Screenshot 2026-04-20 at 1 01 55 PM" src="https://github.com/user-attachments/assets/f9a9eecc-f4b3-43f3-bae2-2d45ba1def53" />
 
 
 **Step 6: Monitor Job Execution**
 
   1. Stay on the **Steps** tab of your cluster
-  2. Watch the `WordCount-Job` step move through statuses:
+  2. Watch the `WordCount-Job` step move through statuses: Pending -> Running -> Completed
+  3. Click on the step name to view:
+     - **Log files** (stdout, stderr, controller)
+     - Direct links to YARN/Hadoop logs
 
-```
-Pending -> Running -> Completed
-```
+>*Screenshot checkpoint: Step showing Completed status in green*
 
-3. Click on the step name to view:
-   - **Log files** (stdout, stderr, controller)
-   - Direct links to YARN/Hadoop logs
+>Sample:
 
-> 💡 **Tip:** If the step shows **Failed**, click the step → open **stderr** log to diagnose the error.
-
->*Screenshot checkpoint: Step showing **Completed** status in green*
-
+<img width="1456" height="576" alt="Screenshot 2026-04-20 at 1 08 04 PM" src="https://github.com/user-attachments/assets/32521707-ae3c-44b5-af52-7c4021da591e" />
 
 
 **Step 7: View the Output in S3**
 
-1. Go to **S3** → Navigate to:
+1. Go to **S3** -> Navigate to:
    ```
    s3://emr-lab-<your-id>/output/wordcount/
    ```
 2. You'll see files like `part-00000`, `part-00001`, and `_SUCCESS`
-3. Click **part-00000** → Click **Download**
-4. Open the file — it should look like:
+3. Click *part-00000* -> Click Download
+4. Open the file; it should look like:
 
-```text name=part-00000
-and             2
-cloud           4
-computing       4
-elasticity      1
-enables         1
-future          1
-iaas            1
-include         1
-is              1
-of              1
-paas            1
-provides        1
-saas            1
-scalability     1
-services        1
-the             1
-virtualization  1
-```
+<img width="294" height="309" alt="Screenshot 2026-04-20 at 1 10 52 PM" src="https://github.com/user-attachments/assets/250e0dd6-6c95-402d-bec1-b979cdf6c324" />
 
->*Screenshot checkpoint: S3 output folder and/or the downloaded file contents*
 
+>*Screenshot: S3 output folder [Mandatory]*
+
+<img width="1455" height="374" alt="Screenshot 2026-04-20 at 1 12 39 PM" src="https://github.com/user-attachments/assets/fcd7c577-5b58-46da-bfbd-fdfcddc6c1b0" />
 
 
 **Step 8: Examine Hadoop Job Logs and Metrics**
+  - Go to **EMR Console** → Click your cluster
+  - Click the **Application user interfaces** tab
+  - Under **On-cluster user interfaces**, click **Resource Manager**
+  - In the Hadoop Resource Manager UI:
+  - Click **Applications** (left menu) -> Click your completed job
 
-**Option A: Via EMR Application UIs (Recommended)**
+>*Screenshot checkpoint: Hadoop ResourceManager job statistics page [Mandatory].*
 
-1. Go to your cluster in EMR Console
-2. Click **Application user interfaces** tab
-3. Click **ResourceManager** (you may need to enable SSH tunnel or use the **SSM** option if available)
+>Sample:
 
-> **For console access without SSH:** EMR 6.x+ supports persistent application UIs via the console directly under **Application user interfaces → On-cluster UIs**. Click **Enable** if prompted.
+<img width="1284" height="286" alt="Screenshot 2026-04-20 at 1 32 10 PM" src="https://github.com/user-attachments/assets/5083af90-a379-4966-b05a-f566fb37ddbb" />
 
-4. In the ResourceManager UI, click **Applications → FINISHED**
-5. Click your job to view:
-   - Number of **Map tasks**
-   - Number of **Reduce tasks**
-   - **Total execution time**
-   - **Input/output bytes processed**
+[All Applications.pdf](https://github.com/user-attachments/files/26887426/All.Applications.pdf)
 
-### Option B: Via Step Logs in S3
-
-1. Go to `s3://emr-lab-<your-id>/logs/<cluster-id>/steps/<step-id>/`
-2. Open `stdout` and `stderr` for job summary info
-
->*Screenshot checkpoint: Hadoop ResourceManager job statistics page*
 
 
 **Step 9: Run a Comparison with a Larger Dataset**
@@ -330,16 +306,42 @@ virtualization  1
 *Screenshot checkpoint: Steps tab showing both completed jobs with their durations*
 
 
-**Step 10: Terminate the EMR Cluster**
+Step 9: Run a Comparison with a Larger Dataset
 
-> **Critical:** EMR clusters charge by the hour. Always terminate when done.
+- Visit [Project Gutenberg](https://www.gutenberg.org) → Download any public domain book as **Plain Text UTF-8** (e.g., *Moby Dick*)
+- Save it as `large_input.txt`
+- Go to **S3** → `emr-lab-<your-name>` → `input/` folder
+- Click **Upload** → **Add files** → Select `large_input.txt` → Click **Upload**
+- Go to **EMR** → your cluster → **Steps** tab → Click **Add step**
 
-1. Go to **EMR Console** -> Select your `MapReduce-Lab-Cluster`
-2. Click **Actions** (top right) -> Click **Terminate**
-3. A confirmation dialog appears - click **Terminate** again
-4. The cluster status will change to `Terminating` → `Terminated`
+| Field | Value |
+|---|---|
+| **Step type** | `Streaming program` |
+| **Name** | `WordCount-Job-Large` |
+| **Mapper** | `s3://emr-lab-<your-name>/scripts/mapper.py` |
+| **Reducer** | `s3://emr-lab-<your-name>/scripts/reducer.py` |
+| **Input location** | `s3://emr-lab-<your-name>/input/large_input.txt` |
+| **Output location** | `s3://emr-lab-<your-name>/output/wordcount-large/` |
+| **Action on failure** | `Continue` |
 
-*Screenshot checkpoint: Termination confirmation dialog or cluster in `Terminated` state*
+- Submit and wait for **Completed**
+- Compare **Elapsed time** of both steps
+
+> 📸 **Screenshot checkpoint:** Both steps showing elapsed time for comparison
+
+---
+
+### Step 10: Terminate the EMR Cluster
+
+- Go to **Amazon EMR** → **Clusters**
+- Check the checkbox next to `MapReduce-Lab-Cluster`
+- Click **Terminate**
+- If termination protection is **On** → click **Change** → turn it **Off** → then confirm **Terminate**
+- Wait for status to show `Terminated`
+
+> 📸 **Screenshot checkpoint:** Termination confirmation or cluster showing **Terminated** status
+
+> ⚠️ **Always terminate your cluster after the lab to avoid ongoing charges.**
 
 ---
 
