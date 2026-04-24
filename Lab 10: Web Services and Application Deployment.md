@@ -38,8 +38,9 @@ These platforms are AWS equivalents to Google App Engine, Microsoft Azure App Se
 
 1. On your local machine, create a project folder and add the following two files.
 
-> Linux/Unix: `mkdir project` `cd project` `vim application.py`
-> Windows: Right click, create folder name `project`, `notepad application.py`
+> Linux/Unix: Open terminal `mkdir project` , `cd project` , `vim application.py`
+
+> Windows: Open Command Prompt ` mkdir project`, `cd project` , `notepad application.py`
 
 ```python name=application.py
 from flask import Flask, jsonify, request
@@ -82,7 +83,9 @@ if __name__ == '__main__':
     application.run(debug=True, host='0.0.0.0', port=5000)
 ```
 
-`requirements.txt`:
+>Linux: `vim requirements.txt`
+
+>Windows: `notepad requirements.txt`
 
 ```text name=requirements.txt
 flask==3.0.0
@@ -103,71 +106,106 @@ flask==3.0.0
 zip -r cloud-web-service.zip application.py requirements.txt
 ```
 
+>`ls`
+
 >Windows 10/11
 ```
 tar -a -c -f cloud-web-service.zip application.py requirements.txt
 ```
 
+>`dir /p`
+
 2. Confirm that `cloud-web-service.zip` was created in the same directory.
+
 
 **Step 3: Create an Elastic Beanstalk Application**
 
-1. Open the AWS Management Console and navigate to Elastic Beanstalk.
+1. Open the AWS Management Console and navigate to **Elastic Beanstalk**.
 2. Click **Create application**.
-3. Set the application name to `cloud-web-service`.
-4. For the platform, select **Python** and choose the **Python 3.9+** branch.
-5. Under application code, select **Upload your code** and upload the `cloud-web-service.zip` file you just created.
-6. Take a screenshot of the application creation page with the ZIP file uploaded.
+3. Set the application name to `cloud-web-service`. The environment name will auto-populate (e.g., `cloud-web-service-env`); leave it as is.
+4. For the platform, select **Python** and choose the **Python 3.9+** branch. Leave the platform version as the recommended default.
+5. Under application code, select **Local file**. Click **Choose file** and upload the `cloud-web-service.zip` file you just created.
+6. Under **Infrastructure**, configure the following:
+   - Environment tier: `Web server environment`
+   - Auto scaling group -> Environment type: **Single instance**
+   - Autoscaling configuration: `On-Demand instance`
+   - Compute -> Architecture: `x86_64`; Instance types: leave default
+   - Root volume: leave default
+7. Under **Additional infrastructure details**, set the following:
+   - EC2 instance profile: `LabInstanceProfile`
+   - EC2 key pair: `CloudLab`
+   - **Service role: select `LabRole`** *(do NOT leave this as "Auto-generated" — it will cause a deployment failure)*
+8. Under **Additional services -> Monitoring**, set health reporting to **Enhanced**.
+9. Leave all other settings as they are and click **Create**.
+    
+*Take a screenshot of the environment configuration review page before clicking Create.*
 
-**Step 4: Configure the Environment**
 
-1. On the environment configuration page, set the capacity to **Single instance** (appropriate for a lab environment).
-2. Under environment properties, add the variable `ENVIRONMENT` with the value `production`.
-3. Enable **Enhanced health reporting** under the monitoring section.
-4. Take a screenshot of the environment configuration page.
+**Step 4: Deploy the Application**
 
-**Step 5: Deploy the Application**
+1. After clicking **Create**, Elastic Beanstalk will begin provisioning the environment and deploying your code. This typically takes **5 to 10 minutes**. Monitor the **Events** tab for progress.
+2. Once deployment is complete, confirm that the environment health status shows **Ok** in green on the Elastic Beanstalk dashboard.
+   
+*Take a screenshot of the Elastic Beanstalk dashboard showing the green **Ok** health status.*
 
-1. Click **Create application** and wait for Elastic Beanstalk to provision the environment and deploy the code. This typically takes 5 to 10 minutes.
-2. Once deployment is complete, confirm that the environment health status shows **Ok** in green.
-3. Take a screenshot of the Elastic Beanstalk dashboard showing the green health status.
 
-**Step 6: Test All API Endpoints**
+**Step 5: Test All API Endpoints**
 
-1. On the Elastic Beanstalk environment page, copy the environment URL.
-2. Open a browser and navigate to the root URL: `http://<env-name>.<region>.elasticbeanstalk.com/`
-3. Test the following endpoints by appending each path to the base URL:
-   - `/api/students` — should return a JSON list of students
-   - `/api/courses` — should return a JSON list of courses
-   - `/health` — should return `{"status": "healthy"}` with a 200 status code
-4. Take a screenshot of the browser showing the JSON response from `/api/students`.
+1. On the Elastic Beanstalk environment page, copy the environment URL shown at the top (e.g., `http://cloud-web-service-env.eba-xxxx.us-east-1.elasticbeanstalk.com`).
+2. Open a browser and test the following endpoints by appending each path to the base URL:
 
-**Step 7: View Application Logs**
+   | Endpoint | Expected Response |
+   |---|---|
+   | `/` | Root response from the application |
+   | `/api/students` | JSON list of students |
+   | `/api/courses` | JSON list of courses |
+   | `/health` | `{"status": "healthy"}` with HTTP 200 |
 
-1. In the Elastic Beanstalk console, open your environment and go to the **Logs** section.
+
+*Take a screenshot of the browser showing the JSON response from `/api/students`.*
+
+
+
+**Step 6: View Application Logs**
+
+1. In the Elastic Beanstalk console, open your environment and navigate to the **Logs** section in the left sidebar.
 2. Click **Request logs** and select **Last 100 lines**.
-3. Review the log output to confirm that your API requests were handled and recorded.
-4. Take a screenshot of the log output.
+3. Once the logs are generated, click **Download** and review the output to confirm that your API requests were handled and recorded.
+   
+*Take a screenshot of the log output showing the recorded API requests.*
 
-**Step 8: Explore AWS App Runner**
 
-1. Navigate to the App Runner console and click **Create service**.
-2. Review the available source options, which include a source code repository or a container image.
-3. Browse the configuration options for auto-scaling, health checks, and custom domains to understand how App Runner differs from Elastic Beanstalk in its level of management and abstraction.
-4. Take a screenshot of the App Runner service creation page for comparison.
+**Step 7: Explore AWS App Runner**
 
-**Step 9: Set Up a CloudWatch Alarm**
+1. Navigate to the **App Runner** console from the AWS Management Console and click **Create service**.
+2. Review the available source options:
+   - **Source code repository** (connects to GitHub/Bitbucket via a connector)
+   - **Container image** (pulls from Amazon ECR or a public registry)
+3. Browse through the configuration options and note the following differences compared to Elastic Beanstalk:
 
-1. Navigate to the CloudWatch console and go to **Alarms**.
-2. Click **Create alarm** and select a metric.
-3. Choose the Elastic Beanstalk metric for `ApplicationRequests5xx`, set the threshold to greater than 5 over a 5-minute period.
-4. Configure an action to send a notification via an SNS topic (create a new topic if needed and enter your email address to receive alerts).
-5. Name the alarm and complete the setup.
-6. Take a screenshot of the alarm configuration.
+   | Feature | Elastic Beanstalk | App Runner |
+   |---|---|---|
+   | Infrastructure management | You configure EC2, scaling, VPC | Fully abstracted — no server management |
+   | Deployment source | ZIP file / S3 | Source code repo or container image |
+   | Auto-scaling | Configurable | Automatic, built-in |
+   | Health checks | Enhanced monitoring via CloudWatch | Built-in HTTP health checks |
+   | Custom domains | Manual setup | Supported natively |
 
-**Step 10: Update the Application**
 
-1. Open `application.py` locally and add a new endpoint. For example:
+*Take a screenshot of the App Runner service creation page for comparison.*
+
+**Step 8: Set Up a CloudWatch Alarm**
+
+  1. Navigate to the CloudWatch console and go to **Alarms**.
+  2. Click **Create alarm** and select a metric.
+  3. Choose the Elastic Beanstalk metric for `ApplicationRequests5xx`, set the threshold to greater than 5 over 5 minutes.
+  4. Configure an action to send a notification via an SNS topic (create a new topic if needed and enter your email address to receive alerts).
+  5. Name the alarm and complete the setup.
+  6. Take a screenshot of the alarm configuration.
+
+**Step 9: Update the Application**
+
+  1. Open `application.py` locally and add a new endpoint. For example:
 
 ```python name=application.py
 @application.route('/api/info', methods=['GET'])
@@ -175,26 +213,26 @@ def get_info():
     return jsonify({"lab": "Lab 10", "topic": "Web Services"})
 ```
 
-2. Repackage the application:
+  2. Repackage the application:
 
 ```bash name=repackage.sh
 zip -r cloud-web-service-v2.zip application.py requirements.txt
 ```
 
-3. In the Elastic Beanstalk console, go to your environment and click **Upload and deploy**.
-4. Upload the new ZIP file and confirm the deployment.
-5. Watch the deployment events to observe the rolling update process.
-6. Take a screenshot of the deployment events showing a successful update.
+  3. In the Elastic Beanstalk console, go to your environment and click **Upload and deploy**.
+  4. Upload the new ZIP file and confirm the deployment.
+  5. Watch the deployment events to observe the rolling update process.
+  6. Take a screenshot of the deployment events showing a successful update.
 
 ---
 
 **Results**
 
-- The RESTful web service was deployed successfully on Elastic Beanstalk and all endpoints returned correct JSON responses.
-- Environment variables and enhanced monitoring were configured through the Elastic Beanstalk console.
-- Application updates were deployed using the upload and deploy workflow, with Elastic Beanstalk handling the rolling update automatically.
-- A CloudWatch alarm was configured to detect elevated 5xx error rates and send notifications.
-- AWS App Runner was reviewed as a fully managed alternative to Elastic Beanstalk.
+  - The RESTful web service was deployed successfully on Elastic Beanstalk, and all endpoints returned correct JSON responses.
+  - Environment variables and enhanced monitoring were configured through the Elastic Beanstalk console.
+  - Application updates were deployed using the upload and deploy workflow, with Elastic Beanstalk handling the rolling update automatically.
+  - A CloudWatch alarm was configured to detect elevated 5xx error rates and send notifications.
+  - AWS App Runner was reviewed as a fully managed alternative to Elastic Beanstalk.
 
 ---
 
