@@ -238,7 +238,7 @@ tar -a -c -f cloud-web-service.zip application.py requirements.txt
 
 
 
-**Step 8: Set Up a CloudWatch Alarm**
+**Step 8: Set Up a CloudWatch Alarm [Optional]**
 
   1. Navigate to the **CloudWatch** console and go to **Alarms**.
   2. Click **Create alarm** and select a **metric**.
@@ -247,7 +247,7 @@ tar -a -c -f cloud-web-service.zip application.py requirements.txt
   5. Name the alarm and complete the setup.
   6. Take a screenshot of the alarm configuration.
 
-**Step 9: Update the Application**
+**Step 9: Update the Application [Optional]**
 
   1. Open `application.py` locally and add a new endpoint. For example:
 
