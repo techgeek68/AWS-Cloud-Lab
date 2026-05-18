@@ -346,10 +346,10 @@ echo "=== User Data Script Completed Successfully at $(date) ==="
 > *Screenshot: ALB configuration with correct security group [Mandatory]*
 
 > Sample:
-
+---
 <img width="1457" height="557" alt="Screenshot 2026-04-17 at 10 53 50 AM" src="https://github.com/user-attachments/assets/5629ea77-360f-4544-be1f-f3ecf6b64d97" />
 
-
+---
 **Step 5: Create the Auto Scaling Group**
   - Navigate to **EC2 > Auto Scaling > Auto Scaling Groups > Create Auto Scaling group**
   - Set Auto Scaling group name to `web-asg`
@@ -378,11 +378,11 @@ echo "=== User Data Script Completed Successfully at $(date) ==="
 > *Screenshot: Auto Scaling Group with increased health check grace period [Mandatory]*
 
 > Sample:
-
+---
 <img width="1457" height="533" alt="Screenshot 2026-04-19 at 7 18 07 AM" src="https://github.com/user-attachments/assets/963023f7-e4f5-4443-92fd-12b5839b99fe" />
 
 
-
+---
 **Step 6: Verify Initial Instances**
   - **Wait 8-12 minutes** for instances to launch, install software, and pass health checks
   - Navigate to **EC2 > Instances** and confirm two instances with prefix `web-asg` are **Running**
