@@ -1,6 +1,6 @@
 # Introduction to the Cloud Computing Lab
 
-- Lab  to  Syllabus Mapping
+>Introduction to Cloud Computing Syllabus to Lab Mapping
 
 | Lab | Title | Syllabus Unit |
 |-----|-------|---------------|
@@ -17,7 +17,7 @@
 | 11 | Database as a Service (RDS, DynamoDB) | Unit 6: Cloud Applications |
 | 12 | Infrastructure as Code (CloudFormation) | Unit 2: SOA Design & Unit 1: Cloud Adoption |
 
-
+---
 
 **Important Recommendations:**
   - Always **terminate/delete resources** after each lab to avoid unexpected AWS charges
