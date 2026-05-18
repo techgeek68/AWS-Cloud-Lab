@@ -19,7 +19,7 @@
 
 
 
-**Important Notes:**
+**Important Recommendations:**
   - Always **terminate/delete resources** after each lab to avoid unexpected AWS charges
   - Monitor the **AWS Billing Dashboard** regularly
   - Use **Free Tier eligible** resources wherever possible
