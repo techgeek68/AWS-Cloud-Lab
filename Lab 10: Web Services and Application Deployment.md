@@ -94,9 +94,10 @@ flask==3.0.0
 > *Screenshot: Take a screenshot of the project folder showing both files [Mandatory]*
 
 > Sample:
-
+---
 <img width="884" height="179" alt="Screenshot 2026-04-23 at 1 16 30 PM" src="https://github.com/user-attachments/assets/71453c88-1af0-4ab3-a974-7e7607d821bb" />
 
+---
 **Step 2: Create the Deployment Package**
 
 1. Open a terminal in your project folder and run the following command to create a ZIP archive:
@@ -117,6 +118,7 @@ tar -a -c -f cloud-web-service.zip application.py requirements.txt
 
 2. Confirm that `cloud-web-service.zip` was created in the same directory.
 
+---
 
 **Step 3: Create an Elastic Beanstalk Application**
 
@@ -142,10 +144,10 @@ tar -a -c -f cloud-web-service.zip application.py requirements.txt
 >*Screenshot: Take a screenshot of the environment configuration review page before clicking Create [Mandatory].*
 
 >Sample:
-
+---
 <img width="1458" height="712" alt="Screenshot 2026-04-26 at 11 14 27 AM" src="https://github.com/user-attachments/assets/9c2f3aae-3f7b-4f31-a721-7bb0c1b22319" />
 
-
+---
 **Step 4: Deploy the Application**
 
 
@@ -154,19 +156,19 @@ tar -a -c -f cloud-web-service.zip application.py requirements.txt
 >*Screenshot: Take a screenshot of the Elastic Beanstalk dashboard showing the green **Ok** health status.*
 
 >Sample:
-
+---
 <img width="1470" height="539" alt="Screenshot 2026-04-26 at 11 17 16 AM" src="https://github.com/user-attachments/assets/03e24577-5673-4b95-8989-c6d1ff221a72" />
 
-
+---
 **Step 5: Test All API Endpoints**
 
 1. On the Elastic Beanstalk environment page, copy the environment URL shown at the top (e.g., `http://cloud-web-service-env.eba-xxxx.us-east-1.elasticbeanstalk.com`).
 
 >*Screenshot:[Mandatory]*
-
+---
 <img width="334" height="64" alt="Screenshot 2026-04-26 at 11 20 25 AM" src="https://github.com/user-attachments/assets/040236fa-b94d-4380-8e11-608f3b56fae3" />
 
-
+---
 3. Open a browser and test the following endpoints by appending each path to the base URL:
 
   - Endpoint:`/`
@@ -174,36 +176,37 @@ tar -a -c -f cloud-web-service.zip application.py requirements.txt
   - Expected Response: Root response from the application
 
 >*Screenshot:[Mandatory]*
-
+---
 <img width="1470" height="154" alt="Screenshot 2026-04-26 at 11 21 52 AM" src="https://github.com/user-attachments/assets/f7fbf752-6571-43a5-8449-318236a0773b" />
 
-
+---
   - Endpoint:`/api/students`
   - Example: http://cloud-web-service-env-1.eba-3tfcravw.us-east-1.elasticbeanstalk.com/api/students
   - Expected Response: JSON list of students
 
 >*Screenshot:[Mandatory]*
-
+---
 <img width="1470" height="134" alt="Screenshot 2026-04-26 at 11 22 36 AM" src="https://github.com/user-attachments/assets/4f6e6356-e483-4f50-81af-ee156be46a48" />
 
-
+---
   - Endpoint:`/api/courses`
   - Example:
   - Expected Response: JSON list of courses
 
 >*Screenshot:[Mandatory]*
-
+---
 <img width="1145" height="101" alt="Screenshot 2026-04-26 at 12 25 25 PM" src="https://github.com/user-attachments/assets/620a964f-fc68-4aeb-8ea5-e90a654b1f1a" />
 
-
+---
   - Endpoint:`/health`
   - Example:
   - Expected Response: `{"status": "healthy"}` with HTTP 200 
 
 >*Screenshot:[Mandatory]*
-
+---
 ![Screenshot 2026-04-26 at 12 26 53 PM](https://github.com/user-attachments/assets/b59d3e58-b7cb-4c28-9650-40f9c092ea6d)
 
+---
 
 **Step 6: View Application Logs**
 
@@ -212,13 +215,16 @@ tar -a -c -f cloud-web-service.zip application.py requirements.txt
 3. Once the logs are generated, click **Download** and review the output to confirm that your API requests were handled and recorded.
    
 >*Screenshot: Take a screenshot of the log output showing the recorded API requests [Mandatory].*
-
+---
 <img width="1453" height="618" alt="Screenshot 2026-04-26 at 12 33 59 PM" src="https://github.com/user-attachments/assets/da3d28f6-93ef-4cb6-b8f0-d718f06ecba1" />
 
+---
 <img width="1455" height="732" alt="Screenshot 2026-04-26 at 12 34 17 PM" src="https://github.com/user-attachments/assets/bc948786-bae0-4095-a776-6dea1ef0f63c" />
 
+---
 <img width="1458" height="758" alt="Screenshot 2026-04-26 at 12 35 43 PM" src="https://github.com/user-attachments/assets/3f1b2a87-c697-4f81-b254-d102ecf0c0d8" />
 
+---
 
 **Step 7: Explore AWS App Runner [Optional]**
 
@@ -236,7 +242,7 @@ tar -a -c -f cloud-web-service.zip application.py requirements.txt
    | Health checks | Enhanced monitoring via CloudWatch | Built in HTTP health checks |
    | Custom domains | Manual setup | Supported natively |
 
-
+---
 
 **Step 8: Set Up a CloudWatch Alarm [Optional]**
 
@@ -246,6 +252,8 @@ tar -a -c -f cloud-web-service.zip application.py requirements.txt
   4. Configure an action to send a notification via an SNS topic (create a new topic if needed and enter your email address to receive alerts).
   5. Name the alarm and complete the setup.
   6. Take a screenshot of the alarm configuration.
+
+---
 
 **Step 9: Update the Application [Optional]**
 
@@ -282,7 +290,7 @@ zip -r cloud-web-service-v2.zip application.py requirements.txt
 
 **Discussion and Conclusion**
 
-This lab demonstrated how to deploy and manage a RESTful web service on AWS using Elastic Beanstalk. As a PaaS offering, Elastic Beanstalk abstracts the underlying infrastructure so developers can concentrate on application code. Provisioning, load balancing, scaling, and health monitoring are all handled by the platform automatically.
+This lab demonstrated how to deploy and manage a RESTful web service on AWS using Elastic Beanstalk. As a PaaS offering, Elastic Beanstalk abstracts away the underlying infrastructure, allowing developers to focus on application code. Provisioning, load balancing, scaling, and health monitoring are all handled by the platform automatically.
 
 The RESTful API design used here follows the same web service standards found across all major cloud platforms. Google App Engine, Microsoft Azure App Service, and Aneka serve the same fundamental purpose as Elastic Beanstalk, each offering a managed environment where developers deploy code without managing servers directly.
 
